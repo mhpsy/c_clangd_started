@@ -53,6 +53,17 @@ compile_commands.json -> build/compile_commands.json
 
 每次修改 `CMakeLists.txt` 后重新运行 `cmake -S . -B build` 即可更新。
 
+
+## 连线
+
+屏幕   板子
+BL    GPIO1
+CS    GPIO2
+DC    GPIO4
+RST   GPIO7
+SCL   SCK
+SDA   MI
+
 ## License
 
 MIT
