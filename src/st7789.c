@@ -3,11 +3,18 @@
 #include <unistd.h>
 #include <string.h>
 
-/* GPIO bitmasks */
+/* GPIO bitmasks
+ * CH347F pin mapping (from schematic):
+ *   SCS0 (HW SPI CS) = dedicated pin 13, independent of GPIO numbering
+ *   GPIO1 = plain GPIO
+ *   GPIO2 = DTR0/TNOW0  - used as software CS
+ *   GPIO4 = TCK/SWDCLK  - JTAG pin, no SPI conflict
+ *   GPIO7 = TMS/SWDIO   - JTAG pin, no SPI conflict
+ */
 #define PIN_BL  (1u << 1)   /* GPIO1 - Backlight */
-#define PIN_CS  (1u << 2)   /* GPIO2 - Chip Select (plain GPIO, no HW conflict) */
-#define PIN_DC  (1u << 4)   /* GPIO4 - Data/Command (shared with SPI CS0!) */
-#define PIN_RST (1u << 7)   /* GPIO7 - Reset */
+#define PIN_CS  (1u << 2)   /* GPIO2 - Chip Select (software, DTR0 pin) */
+#define PIN_DC  (1u << 4)   /* GPIO4 - Data/Command (TCK/SWDCLK pin, no SPI conflict) */
+#define PIN_RST (1u << 7)   /* GPIO7 - Reset (TMS/SWDIO pin, no SPI conflict) */
 
 /* ST7789 commands */
 #define ST7789_SWRESET  0x01
@@ -31,11 +38,9 @@ static void pin_set(ch347_dev_t *dev, uint8_t pins, bool high)
 }
 
 /*
- * DC = GPIO4 = SPI CS0 on CH347.
- *
- * Strategy: always use spi_write_nocs (cs_byte=0x00) so the SPI hardware
- * never auto-toggles GPIO4. We set GPIO4 via GPIO command immediately before
- * each SPI transfer; the hardware leaves it alone during the transfer.
+ * CS (GPIO2) is managed manually. We use spi_write_nocs throughout so the
+ * CH347 SPI hardware never auto-toggles its own SCS0 pin, leaving our
+ * software CS and DC fully under GPIO control.
  */
 static void write_cmd(ch347_dev_t *dev, uint8_t cmd)
 {
