@@ -396,3 +396,36 @@ int ch347_gpio_set_pin(ch347_dev_t *dev, int gpio_num, bool value)
     /* No response read - GPIO command is fire-and-forget for speed */
     return 0;
 }
+
+/**
+ * ch347_gpio_set_pins - set multiple GPIO pins in a single USB command
+ *
+ * mask : bitmask of pins to configure (bit N = GPIO N, pins 0..7)
+ * value: bitmask of output levels     (bit N = HIGH if set, LOW if clear)
+ *
+ * All pins in mask are sent in one 11-byte packet so the CH347
+ * applies them atomically instead of one-by-one.
+ */
+int ch347_gpio_set_pins(ch347_dev_t *dev, uint8_t mask, uint8_t value)
+{
+    if (!dev) return -1;
+
+    uint8_t buf[11];
+    memset(buf, 0, sizeof(buf));
+    buf[0] = CMD_GPIO_CTRL;
+    buf[1] = 8;
+    buf[2] = 0;
+
+    for (int i = 0; i < 8; i++) {
+        if (mask & (1u << i))
+            buf[3 + i] = (value & (1u << i)) ? 0xF8 : 0xF0;
+    }
+
+    int r = usb_write(dev, buf, sizeof(buf));
+    if (r < 0) {
+        fprintf(stderr, "[ch347] gpio_set_pins(mask=0x%02X, value=0x%02X): write failed\n",
+                mask, value);
+        return -1;
+    }
+    return 0;
+}

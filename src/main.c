@@ -3,9 +3,8 @@
 #include "config.h"
 #include "ch347.h"
 
-/* GPIO pins to toggle */
-static const int PINS[] = {1, 2, 3, 4, 5, 6, 7};
-#define PIN_COUNT ((int)(sizeof(PINS) / sizeof(PINS[0])))
+/* GPIO 1-7: bitmask 0b11111110 = 0xFE */
+#define GPIO_MASK 0xFE
 
 int main(void)
 {
@@ -14,13 +13,11 @@ int main(void)
     ch347_dev_t *dev = ch347_open();
     if (!dev) return 1;
 
-    bool state = false;
+    uint8_t state = 0x00;
     while (1) {
-        for (int i = 0; i < PIN_COUNT; i++) {
-            ch347_gpio_set_pin(dev, PINS[i], state);
-        }
+        ch347_gpio_set_pins(dev, GPIO_MASK, state);
         printf("[gpio] pins 1-7 -> %s\n", state ? "HIGH" : "LOW");
-        state = !state;
+        state = state ? 0x00 : 0xFF;
         sleep(1);
     }
 

@@ -34,6 +34,13 @@ int ch347_spi_init(ch347_dev_t *dev, ch347_spi_mode_t mode, ch347_spi_clock_t cl
 int ch347_spi_write(ch347_dev_t *dev, const uint8_t *data, size_t len);
 int ch347_gpio_set_pin(ch347_dev_t *dev, int gpio_num, bool value);
 
+/* Set multiple GPIO pins in a single USB command.
+ * mask : bitmask of pins to change (bit N = GPIO N)
+ * value: bitmask of output levels  (bit N = HIGH if set)
+ * Example: set GPIO 1,2,3 HIGH → ch347_gpio_set_pins(dev, 0x0E, 0x0E)
+ */
+int ch347_gpio_set_pins(ch347_dev_t *dev, uint8_t mask, uint8_t value);
+
 /* Low-level CS control for batched transactions */
 int ch347_spi_cs_assert(ch347_dev_t *dev);    /* assert CS0, drain any queued responses */
 int ch347_spi_cs_deassert(ch347_dev_t *dev);  /* deassert CS0, drain any queued responses */
