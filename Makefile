@@ -1,7 +1,7 @@
 CC      = clang
 CFLAGS  = -Wall -Wextra -std=c11 -g
 SRC     = src/main.c
-TARGET  = ch347_run_st7789
+TARGET  = build/ch347_run_st7789
 
 .PHONY: all clean run compile_commands
 
