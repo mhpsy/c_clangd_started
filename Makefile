@@ -1,14 +1,18 @@
 CC      = clang
 CFLAGS  = -Wall -Wextra -std=c11 -g
-SRC     = src/main.c
+SRC     = $(wildcard src/*.c)
 TARGET  = build/ch347_run_st7789
+LDLIBS  = -lusb-1.0
 
 .PHONY: all clean run compile_commands
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $@ $^
+build:
+	mkdir -p $@
+
+$(TARGET): $(SRC) Makefile | build
+	$(CC) $(CFLAGS) -o $@ $(SRC) $(LDLIBS)
 
 run: $(TARGET)
 	./$(TARGET)
