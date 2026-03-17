@@ -2,9 +2,7 @@
 #include <unistd.h>
 #include "config.h"
 #include "ch347.h"
-
-/* GPIO 1-7: bitmask 0b11111110 = 0xFE */
-#define GPIO_MASK 0xFE
+#include "st7789.h"
 
 int main(void)
 {
@@ -13,11 +11,15 @@ int main(void)
     ch347_dev_t *dev = ch347_open();
     if (!dev) return 1;
 
-    uint8_t state = 0x00;
+    st7789_init(dev);
+
     while (1) {
-        ch347_gpio_set_pins(dev, GPIO_MASK, state);
-        printf("[gpio] pins 1-7 -> %s\n", state ? "HIGH" : "LOW");
-        state = state ? 0x00 : 0xFF;
+        printf("fill RED\n");
+        st7789_fill(dev, ST7789_RED);
+        sleep(1);
+
+        printf("fill BLUE\n");
+        st7789_fill(dev, ST7789_BLUE);
         sleep(1);
     }
 
